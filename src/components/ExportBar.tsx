@@ -16,9 +16,10 @@ interface ExportBarProps {
   columns: ColumnDefinition[];
   rows: ExtractedRow[];
   documentTitle: string;
-  options: ScanOptions;
-  onOptionsChange: (newOptions: ScanOptions) => void;
-  onReset: () => void;
+  options?: ScanOptions;
+  delimiter?: ';' | ',' | '\t';
+  onOptionsChange?: (newOptions: ScanOptions) => void;
+  onReset?: () => void;
 }
 
 export const ExportBar: React.FC<ExportBarProps> = ({
@@ -26,10 +27,13 @@ export const ExportBar: React.FC<ExportBarProps> = ({
   rows,
   documentTitle,
   options,
+  delimiter,
   onOptionsChange,
   onReset,
 }) => {
   const [copied, setCopied] = useState(false);
+
+  const activeDelimiter = options?.delimiter || delimiter || ';';
 
   const cleanDocTitle = documentTitle
     ? documentTitle.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30)
@@ -37,7 +41,7 @@ export const ExportBar: React.FC<ExportBarProps> = ({
   const baseFileName = `${cleanDocTitle}_${new Date().toISOString().slice(0, 10)}`;
 
   const handleDownloadCsv = () => {
-    downloadCsv(columns, rows, `${baseFileName}.csv`, options.delimiter);
+    downloadCsv(columns, rows, `${baseFileName}.csv`, activeDelimiter);
   };
 
   const handleDownloadExcel = () => {
@@ -52,6 +56,12 @@ export const ExportBar: React.FC<ExportBarProps> = ({
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Error al copiar al portapapeles:', err);
+    }
+  };
+
+  const handleDelimiterChange = (newDelim: ';' | ',' | '\t') => {
+    if (onOptionsChange && options) {
+      onOptionsChange({ ...options, delimiter: newDelim });
     }
   };
 
@@ -96,8 +106,8 @@ export const ExportBar: React.FC<ExportBarProps> = ({
         <div className="flex items-center space-x-1.5">
           <label className="text-slate-500 font-medium">Separador CSV:</label>
           <select
-            value={options.delimiter}
-            onChange={(e) => onOptionsChange({ ...options, delimiter: e.target.value as any })}
+            value={activeDelimiter}
+            onChange={(e) => handleDelimiterChange(e.target.value as any)}
             className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold"
           >
             <option value=";">Punto y coma ( ; )</option>
@@ -106,14 +116,16 @@ export const ExportBar: React.FC<ExportBarProps> = ({
           </select>
         </div>
 
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex items-center space-x-1.5 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors font-medium border border-slate-200"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Escanear otro PDF</span>
-        </button>
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex items-center space-x-1.5 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors font-medium border border-slate-200"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Escanear otro PDF</span>
+          </button>
+        )}
       </div>
     </div>
   );

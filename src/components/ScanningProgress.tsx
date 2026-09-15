@@ -4,16 +4,27 @@ import { Loader2, CheckCircle2, ScanLine, FileSearch, Sparkles, FileSpreadsheet,
 interface ScanningProgressProps {
   fileName?: string;
   isOptimizedUpload?: boolean;
+  batchInfo?: {
+    current: number;
+    total: number;
+    currentFileName: string;
+  };
+  activeEngine?: string | null;
 }
 
 const STEPS = [
-  { id: 1, label: 'Enviando documento optimizado al servidor local', icon: ScanLine },
-  { id: 2, label: 'Detectando orientación y columnas del formato', icon: FileSearch },
-  { id: 3, label: 'Transcribiendo tabla con IA ultrarrápida (Gemini Flash)', icon: Sparkles },
-  { id: 4, label: 'Validando documentos y estructurando registros CSV', icon: FileSpreadsheet },
+  { id: 1, label: 'Enviando documento optimizado al servidor', icon: ScanLine },
+  { id: 2, label: 'Detectando orientación y casillas de SIVIGILA Cara A', icon: FileSearch },
+  { id: 3, label: 'Transcribiendo datos con IA (Google Gemini / OpenAI ChatGPT)', icon: Sparkles },
+  { id: 4, label: 'Auditando correcciones en rojo y estructurando base Excel', icon: FileSpreadsheet },
 ];
 
-export const ScanningProgress: React.FC<ScanningProgressProps> = ({ fileName, isOptimizedUpload }) => {
+export const ScanningProgress: React.FC<ScanningProgressProps> = ({
+  fileName,
+  isOptimizedUpload,
+  batchInfo,
+  activeEngine,
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -33,26 +44,56 @@ export const ScanningProgress: React.FC<ScanningProgressProps> = ({ fileName, is
       clearTimeout(timer2);
       clearTimeout(timer3);
     };
-  }, []);
+  }, [batchInfo?.current]);
+
+  const percent = batchInfo ? Math.round((batchInfo.current / batchInfo.total) * 100) : null;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-8 max-w-2xl mx-auto shadow-xs text-center space-y-6">
+    <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-2xl mx-auto shadow-xs text-center space-y-6">
       <div className="w-16 h-16 mx-auto rounded-full bg-blue-50 flex items-center justify-center text-blue-600 relative">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
 
       <div>
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold mb-2">
-          <Clock className="w-3.5 h-3.5 text-amber-600" />
-          <span>Tiempo transcurrido: {elapsedSeconds}s</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
+            <span>Tiempo: {elapsedSeconds}s</span>
+          </div>
+
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>{activeEngine || 'Motor Dual: Gemini + ChatGPT'}</span>
+          </div>
         </div>
-        <h3 className="text-base sm:text-lg font-bold text-slate-900">
-          Escaneando y transcribiendo documento
-        </h3>
-        {fileName && (
-          <p className="text-xs text-slate-500 font-mono mt-1">
-            {fileName} {isOptimizedUpload && '· (Subida comprimida al 90%)'}
-          </p>
+
+        {batchInfo ? (
+          <div className="space-y-3">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              Procesando lote de archivos: {batchInfo.current} de {batchInfo.total} ({percent}%)
+            </h3>
+            {/* Progress bar */}
+            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden max-w-md mx-auto">
+              <div
+                className="bg-emerald-600 h-2.5 rounded-full transition-all duration-300"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <p className="text-xs text-slate-600 font-mono">
+              Archivo actual: <strong className="text-slate-800">{batchInfo.currentFileName}</strong>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              Escaneando y transcribiendo ficha
+            </h3>
+            {fileName && (
+              <p className="text-xs text-slate-500 font-mono mt-1">
+                {fileName} {isOptimizedUpload && '· (Subida comprimida)'}
+              </p>
+            )}
+          </div>
         )}
       </div>
 
@@ -65,7 +106,7 @@ export const ScanningProgress: React.FC<ScanningProgressProps> = ({ fileName, is
           return (
             <div
               key={step.id}
-              className={`flex items-center space-x-3 p-2.5 rounded-lg border transition-all ${
+              className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all ${
                 isCurrent 
                   ? 'bg-blue-50/70 border-blue-200 text-blue-900 font-medium shadow-2xs' 
                   : isDone 
@@ -90,7 +131,7 @@ export const ScanningProgress: React.FC<ScanningProgressProps> = ({ fileName, is
 
       <div className="flex items-center justify-center space-x-2 text-xs text-slate-400 italic">
         <Zap className="w-3.5 h-3.5 text-amber-500" />
-        <span>Optimizado con Gemini 3.1 Flash-Lite y esquema compacto de valores.</span>
+        <span>Extracción multimodelo con auditoría de calidad y correcciones en rojo.</span>
       </div>
     </div>
   );

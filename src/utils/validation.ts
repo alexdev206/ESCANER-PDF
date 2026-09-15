@@ -1,6 +1,29 @@
 import { ColumnDefinition, ExtractedRow } from '../types';
 
 export const TEMPLATES = {
+  SISVESO_CARA_A: {
+    nombre: 'SISVESO / SIVIGILA Cara A (Vigilancia Salud Oral)',
+    claves: ['sisveso', 'cara a', 'hoja 1', 'sivigila', 'salud oral', 'evento 2303'],
+    columns: [
+      { key: 'NOMBRE_UPGD', label: 'NOMBRE UPGD', type: 'text' as const },
+      { key: 'CODIGO_UPGD', label: 'CÓDIGO UPGD', type: 'text' as const },
+      { key: 'LOCALIDAD_NOTIFICADORA', label: 'LOCALIDAD NOTIFICADORA', type: 'list' as const },
+      { key: 'PRIMER_NOMBRE', label: 'PRIMER NOMBRE', type: 'text' as const },
+      { key: 'SEGUNDO_NOMBRE', label: 'SEGUNDO NOMBRE', type: 'text' as const },
+      { key: 'PRIMER_APELLIDO', label: 'PRIMER APELLIDO', type: 'text' as const },
+      { key: 'SEGUNDO_APELLIDO', label: 'SEGUNDO APELLIDO', type: 'text' as const },
+      { key: 'DOCUMENTO', label: 'N° IDENTIFICACIÓN', type: 'id' as const },
+      { key: 'TIPO_ID', label: 'TIPO ID', type: 'list' as const },
+      { key: 'FECHA_NACIMIENTO', label: 'FECHA NACIMIENTO', type: 'date' as const },
+      { key: 'EDAD', label: 'EDAD', type: 'number' as const },
+      { key: 'FECHA_CONSULTA', label: 'FECHA CONSULTA', type: 'date' as const },
+      { key: 'NOMBRE_ODONTOLOGO', label: 'ODONTÓLOGO', type: 'text' as const },
+      { key: 'OBSERVACIONES', label: 'OBSERVACIONES (RETROALIMENTACIÓN)', type: 'text' as const },
+      { key: 'DIRECCION_RESIDENCIA', label: 'DIRECCIÓN RESIDENCIA', type: 'text' as const },
+      { key: 'BARRIO_RESIDENCIA', label: 'BARRIO', type: 'text' as const },
+      { key: 'ESTRATO', label: 'ESTRATO', type: 'number' as const },
+    ]
+  },
   ADULTOS: {
     nombre: 'Adultos (Consolidado de Caracterización)',
     claves: ['adulto', 'adultos'],

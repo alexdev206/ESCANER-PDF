@@ -25,10 +25,10 @@ export async function optimizeFileForUpload(file: File): Promise<OptimizedFileRe
     };
   }
 
-  // If it's an image, optimize dimensions and compression to save 90% of bandwidth
+  // If it's an image, optimize dimensions and compression to speed up OCR and save bandwidth
   if (file.type.startsWith('image/')) {
     try {
-      const optimized = await compressImage(file, 2048, 0.88);
+      const optimized = await compressImage(file, 1800, 0.82);
       return {
         fileData: optimized.base64,
         originalSize,

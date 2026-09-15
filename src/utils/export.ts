@@ -4,11 +4,12 @@ import { ColumnDefinition, ExtractedRow } from '../types';
 /**
  * Escapes a field according to CSV standards
  */
-function escapeCsvField(field: string | number | undefined, delimiter: string): string {
+function escapeCsvField(field: string | number | undefined, delimiter: string = ';'): string {
   if (field === null || field === undefined) return '';
   const str = String(field);
+  const delim = delimiter || ';';
   // If the field contains delimiter, quotes, or newlines, quote it and escape internal quotes
-  if (str.includes(delimiter) || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+  if (str.includes(delim) || str.includes('"') || str.includes('\n') || str.includes('\r')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -23,28 +24,29 @@ export function generateCsvContent(
   delimiter: ';' | ',' | '\t' = ';',
   includeReviewColumn: boolean = true
 ): string {
+  const delim = delimiter || ';';
   const headers = ['N°', ...columns.map(c => c.label || c.key)];
   if (includeReviewColumn) {
     headers.push('REVISAR_CAMPOS');
   }
 
   const lines: string[] = [
-    headers.map(h => escapeCsvField(h, delimiter)).join(delimiter)
+    headers.map(h => escapeCsvField(h, delim)).join(delim)
   ];
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowValues = [
-      escapeCsvField(row.rowNumber || i + 1, delimiter),
-      ...columns.map(c => escapeCsvField(row.data[c.key] ?? '', delimiter))
+      escapeCsvField(row.rowNumber || i + 1, delim),
+      ...columns.map(c => escapeCsvField(row.data[c.key] ?? '', delim))
     ];
 
     if (includeReviewColumn) {
       const flagged = row.reviewFlags && row.reviewFlags.length > 0 ? row.reviewFlags.join('; ') : 'OK';
-      rowValues.push(escapeCsvField(flagged, delimiter));
+      rowValues.push(escapeCsvField(flagged, delim));
     }
 
-    lines.push(rowValues.join(delimiter));
+    lines.push(rowValues.join(delim));
   }
 
   // Prepend UTF-8 BOM
@@ -60,7 +62,8 @@ export function downloadCsv(
   filename: string = 'transcripcion_escaneo.csv',
   delimiter: ';' | ',' | '\t' = ';'
 ): void {
-  const csvContent = generateCsvContent(columns, rows, delimiter, true);
+  const delim = delimiter || ';';
+  const csvContent = generateCsvContent(columns, rows, delim, true);
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
